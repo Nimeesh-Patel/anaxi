@@ -11,11 +11,18 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(new URL("/login?error=orcid_denied", request.url));
   }
 
+  // Phase 1: Exchange code with ORCID
+  let orcid: string, access_token: string, name: string;
   try {
-    const { orcid, access_token, name } = await exchangeCode(code);
-    const supabase = createAdminClient();
+    ({ orcid, access_token, name } = await exchangeCode(code));
+  } catch (err) {
+    console.error("ORCID token exchange failed:", err);
+    return NextResponse.redirect(new URL("/login?error=orcid_token", request.url));
+  }
 
-    // Upsert user record
+  // Phase 2: Upsert user in DB
+  try {
+    const supabase = createAdminClient();
     const { data: user, error: dbError } = await supabase
       .from("users")
       .upsert(
@@ -32,7 +39,7 @@ export async function GET(request: NextRequest) {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 30, // 30 days
+      maxAge: 60 * 60 * 24 * 30,
     });
     response.cookies.set("anaxi_orcid", orcid, {
       httpOnly: true,
@@ -44,12 +51,11 @@ export async function GET(request: NextRequest) {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 60 * 60 * 24, // 1 day
+      maxAge: 60 * 60 * 24,
     });
-
     return response;
   } catch (err) {
-    console.error("Auth callback error:", err);
-    return NextResponse.redirect(new URL("/login?error=auth_failed", request.url));
+    console.error("DB upsert failed:", err);
+    return NextResponse.redirect(new URL("/login?error=db_write", request.url));
   }
 }
