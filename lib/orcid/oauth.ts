@@ -9,7 +9,7 @@ export function getAuthorizationUrl(state: string): string {
     client_id: process.env.ORCID_CLIENT_ID!,
     response_type: "code",
     scope: "/authenticate",
-    redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
+    redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/callback/orcid`,
     state,
   });
   return `${ORCID_BASE}/oauth/authorize?${params}`;
@@ -28,7 +28,7 @@ export async function exchangeCode(code: string): Promise<{
       client_secret: process.env.ORCID_CLIENT_SECRET!,
       grant_type: "authorization_code",
       code,
-      redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
+      redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/callback/orcid`,
     }),
   });
 

@@ -1,13 +1,12 @@
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { getSession } from "@/lib/session";
 import { getAuthorizationUrl } from "@/lib/orcid/oauth";
 import { Button } from "@/components/ui/button";
 import crypto from "crypto";
 
 export default async function LoginPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (user) redirect("/");
+  const session = await getSession();
+  if (session) redirect("/");
 
   const state = crypto.randomBytes(16).toString("hex");
   const orcidUrl = getAuthorizationUrl(state);
