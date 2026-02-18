@@ -4,20 +4,20 @@ import { getAuthorizationUrl } from "@/lib/orcid/oauth";
 import { Button } from "@/components/ui/button";
 import crypto from "crypto";
 
-const ERROR_MESSAGES: Record<string, string> = {
-  orcid_denied: "You cancelled the ORCID sign-in.",
-  orcid_token: "ORCID token exchange failed — check that ORCID_CLIENT_SECRET is set in Vercel env vars.",
-  db_write: "Could not save your profile — check SUPABASE_SERVICE_ROLE_KEY and NEXT_PUBLIC_SUPABASE_URL in Vercel env vars.",
+const ERROR_LABELS: Record<string, string> = {
+  orcid_denied: "ORCID sign-in was cancelled.",
+  orcid_token: "ORCID token exchange failed.",
+  db_write: "Could not save your profile to the database.",
   auth_failed: "Authentication failed.",
 };
 
-type Props = { searchParams: Promise<{ error?: string }> };
+type Props = { searchParams: Promise<{ error?: string; detail?: string }> };
 
 export default async function LoginPage({ searchParams }: Props) {
   const session = await getSession();
   if (session) redirect("/");
 
-  const { error } = await searchParams;
+  const { error, detail } = await searchParams;
   const state = crypto.randomBytes(16).toString("hex");
   const orcidUrl = getAuthorizationUrl(state);
 
@@ -32,9 +32,14 @@ export default async function LoginPage({ searchParams }: Props) {
         </div>
 
         {error && (
-          <p className="text-sm text-destructive bg-destructive/10 rounded px-3 py-2">
-            {ERROR_MESSAGES[error] ?? `Error: ${error}`}
-          </p>
+          <div className="text-left bg-destructive/10 rounded px-3 py-2 space-y-1">
+            <p className="text-sm text-destructive font-medium">
+              {ERROR_LABELS[error] ?? `Error: ${error}`}
+            </p>
+            {detail && (
+              <p className="text-xs text-destructive/80 font-mono break-all">{detail}</p>
+            )}
+          </div>
         )}
 
         <a href={orcidUrl}>

@@ -2,13 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 import { exchangeCode } from "@/lib/orcid/oauth";
 import { createAdminClient } from "@/lib/supabase/admin";
 
+function errRedirect(request: NextRequest, code: string, detail: string) {
+  const url = new URL("/login", request.url);
+  url.searchParams.set("error", code);
+  url.searchParams.set("detail", detail.slice(0, 200)); // cap length for URL safety
+  return NextResponse.redirect(url);
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
   const error = searchParams.get("error");
 
   if (error || !code) {
-    return NextResponse.redirect(new URL("/login?error=orcid_denied", request.url));
+    return errRedirect(request, "orcid_denied", error ?? "no code");
   }
 
   // Phase 1: Exchange code with ORCID
@@ -16,8 +23,9 @@ export async function GET(request: NextRequest) {
   try {
     ({ orcid, access_token, name } = await exchangeCode(code));
   } catch (err) {
-    console.error("ORCID token exchange failed:", err);
-    return NextResponse.redirect(new URL("/login?error=orcid_token", request.url));
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("ORCID token exchange failed:", msg);
+    return errRedirect(request, "orcid_token", msg);
   }
 
   // Phase 2: Upsert user in DB
@@ -55,7 +63,8 @@ export async function GET(request: NextRequest) {
     });
     return response;
   } catch (err) {
-    console.error("DB upsert failed:", err);
-    return NextResponse.redirect(new URL("/login?error=db_write", request.url));
+    const msg = err instanceof Error ? err.message : JSON.stringify(err);
+    console.error("DB upsert failed:", msg);
+    return errRedirect(request, "db_write", msg);
   }
 }

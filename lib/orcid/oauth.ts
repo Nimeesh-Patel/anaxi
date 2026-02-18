@@ -30,7 +30,10 @@ export async function exchangeCode(code: string): Promise<{
 }> {
   const res = await fetch(`${ORCID_BASE}/oauth/token`, {
     method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      "Accept": "application/json",
+    },
     body: new URLSearchParams({
       client_id: process.env.ORCID_CLIENT_ID!,
       client_secret: process.env.ORCID_CLIENT_SECRET!,
@@ -40,7 +43,10 @@ export async function exchangeCode(code: string): Promise<{
     }),
   });
 
-  if (!res.ok) throw new Error("ORCID token exchange failed");
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`ORCID ${res.status}: ${body}`);
+  }
   const data = await res.json();
   return {
     orcid: data.orcid,
