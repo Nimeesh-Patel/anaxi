@@ -2,11 +2,11 @@
 
 ## Current State
 MVP scaffold complete. Build passes. No Supabase instance connected yet — needs env vars.
+PRD and plan updated with improved vision (2026-02-18).
 
 ## What's Built
-- Next.js 16 (App Router) + TypeScript + Tailwind + shadcn/ui
-- ORCID OAuth flow: `/login` → ORCID → `/auth/callback` → cookie session
-- Custom session: `anaxi_user_id` + `anaxi_orcid` httpOnly cookies (not Supabase Auth)
+- Next.js 15 (App Router) + TypeScript + Tailwind + shadcn/ui
+- ORCID OAuth: `/login` → ORCID → `/auth/callback` → httpOnly cookie session (`anaxi_user_id`, `anaxi_orcid`)
 - arXiv search + pagination (regex Atom XML parser, no external deps)
 - Paper page: arXiv HTML proxied via `/api/paper/[id]/html` (same-origin iframe for text selection)
 - Text selection → `postMessage` → `AnnotationPopover` → `POST /api/annotations`
@@ -15,22 +15,21 @@ MVP scaffold complete. Build passes. No Supabase instance connected yet — need
 - Profile page per ORCID iD
 - Route protection via `proxy.ts`
 
-## Stack Decision
-Next.js 16 · TypeScript · Supabase (PostgreSQL) · ORCID OAuth (custom) · Tailwind · shadcn/ui
-
 ## Key Design Decisions
-- Annotation anchors: `{paper_id, version, text_hash, char_start, char_end, anchor_id}` — orphaned on version update → `is_archived=true`
-- Moderation: flag reasons are ad_hominem / coercion / intimidation / other
+- Annotation anchors: `{paper_id, version, text_hash, char_start, char_end}` — orphaned on version update → `is_archived=true`
+- Moderation flag reasons: ad_hominem / coercion / intimidation / other
 - arXiv HTML proxied server-side to avoid cross-origin DOM restrictions
-- Session: custom cookies, not Supabase Auth (simpler with ORCID)
+- Session: custom cookies, not Supabase Auth
 
 ## To Do Next
-- Wire up version-check annotation archiving (cron or on-load check)
-- Show existing annotations as highlights inside the proxied iframe
-- Annotation sidebar (list all annotations on a paper)
+- Show existing annotations as highlights in iframe (popover creates but no visual highlight yet)
+- Kindle-style highlight count overlay on annotated spans
+- Annotation sidebar (list all annotations on a paper) with upvoting + sort
+- Wire up annotation archiving on paper version update
 - Vote score display on comments
-- `.env.local` setup guide for first run
+- Fix Supabase RLS: switch to service role key for server-side writes (current policies use auth.uid() which doesn't match custom cookie session)
+- `.env.local` setup guide
 
-## Known Issues / Limitations
-- Annotation highlights not yet shown in iframe (popover creates them but no visual highlight)
-- Supabase RLS policies reference `auth.uid()` but we're using custom cookies — needs fixing to use service role for writes or a different policy approach
+## Known Issues
+- Annotation highlights not shown in iframe (infrastructure exists, display missing)
+- Supabase RLS policies incompatible with custom cookie session — use service role on server

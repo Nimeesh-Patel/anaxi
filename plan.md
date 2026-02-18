@@ -67,6 +67,18 @@
   },
   {
     "category": "functional",
+    "description": "Kindle-style highlight count shown on frequently annotated text spans",
+    "steps": [
+      "Create 2+ annotations on overlapping text spans in a paper",
+      "Verify a count indicator (e.g. '3 highlights') appears on that span",
+      "Click the indicator — verify all annotations on that span are shown",
+      "Verify spans with only 1 annotation still show the count",
+      "Verify count updates after a new annotation is added without full page reload"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
     "description": "Annotations from older paper versions are archived when text changes",
     "steps": [
       "Create an annotation on a specific text span (v1 of a paper)",
@@ -74,6 +86,19 @@
       "Verify annotation is archived (not deleted) with 'from earlier version' label",
       "Verify annotations whose text is unchanged still appear correctly",
       "Verify archived annotations are accessible but visually distinct"
+    ],
+    "passes": false
+  },
+  {
+    "category": "functional",
+    "description": "Annotations can be upvoted; top-ranked shown first in sidebar",
+    "steps": [
+      "Open annotation sidebar on a paper with multiple annotations",
+      "Upvote an annotation — verify score increments",
+      "Try upvoting own annotation — verify blocked",
+      "Toggle upvote — verify it can be undone",
+      "Switch annotation sort to 'by rating' — verify reorder by score",
+      "Switch back to chronological — verify original order"
     ],
     "passes": false
   },

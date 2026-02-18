@@ -1,15 +1,26 @@
 # PRD: Anaxi — Open Science Criticism Platform
 
 ## Problem
-Research and scientific culture is inaccessible. There's no public space that embodies the best traditions of rational criticism: flat hierarchies, fallibilism, ideas judged on content not authority. Existing platforms (ResearchGate, Academia.edu, Twitter) either recreate academic gatekeeping or collapse into noise.
+Most research institutions are broken:
+- Bureaucracy and coercive policies stagnate knowledge creation
+- Structured to prevent progress in fundamental theories or creation of new ones
+- Research is gatekept — the assumption is that ordinary people cannot make real contributions
+
+People don't know where to access the best research culture and tradition of criticism.
+
+Reference good model: [Conjecture Institute](https://www.conjectureinstitute.org/)
 
 ## Vision
-A web platform where anyone can discover arXiv papers, read them cleanly, and engage in serious criticism — building a culture rooted in Popperian open society values: anti-authoritarianism, fallibilism, tolerance of everything except anti-rational behavior.
+Digitize the best research culture so anyone can participate. Not just "a" culture — the *best* culture: Popperian open society values, flat hierarchies, fallibilism, ideas judged on content not authority.
+
+People are unfathomably different from each other — this platform is designed to harness that.
+
+A public website that makes arXiv papers easy to discover, understand, debate, and criticise. Online reach that no physical institution can match.
 
 ---
 
 ## Users
-Anyone who creates an ORCID account (free, open, no institutional affiliation required). ORCID is the identity layer — it prevents bots and sockpuppets, not laypeople.
+Anyone with an ORCID account (free, open, 2-3 min, no institutional affiliation). ORCID prevents bots/sockpuppets without gatekeeping genuinely interested people.
 
 ---
 
@@ -19,51 +30,48 @@ Anyone who creates an ORCID account (free, open, no institutional affiliation re
 - Search and browse arXiv papers via arXiv API
 - Primary render: arXiv HTML version (`arxiv.org/html/{id}`) — annotation-friendly, readable
 - Fallback: PDF.js viewer for papers without HTML versions
-- Show paper metadata: title, authors, abstract, categories, date, version
+- Show: title, authors, abstract, categories, date, version
 
 ### 2. In-Paper Annotation
-- Users highlight text spans within the HTML-rendered paper and attach comments
-- Anchors stored as: `{paper_id, version, text_hash, char_offset_start, char_offset_end}`
-- On new paper version: anchors whose text is unchanged persist; orphaned anchors are archived (not deleted), shown as "from earlier version"
-- Annotation threads are nested: reply to any annotation
+- Highlight text spans and attach comments (like Google Docs inline comments)
+- Kindle-style: show highlight count on frequently annotated passages
+- Anchors: `{paper_id, version, text_hash, char_offset_start, char_offset_end}`
+- Version updates: unchanged anchors persist; orphaned anchors archived (not deleted), labeled "from earlier version"
+- Threaded replies on any annotation
+- Annotations rankable by community — surfaces best explanations and criticisms
 
 ### 3. Paper-Level Discussion
-- Separate discussion section below each paper (for broad critiques, summaries, questions)
+- Separate discussion section per paper (broad critiques, summaries, questions)
 - Threaded comments, no character limit
 
 ### 4. Comment Quality & Ranking
-- Community upvotes/downvotes on comments — but shown as **signal**, not sorted by default
-- Default sort: chronological. Optional: sort by rating.
-- Avoids the "popular = correct" trap by not hiding low-voted comments
+- Upvotes/downvotes shown as **signal**, not used for default sort
+- Default: chronological. Optional: by rating
+- Low-voted comments stay visible — avoids "popular = correct" trap
 
 ### 5. Moderation — Popperian Tolerance
-- **Banned**: ad hominem, appeals to authority as argument-substitutes, coercion, intimidation, and any behavior that suppresses others' ability to speak freely
-- **Not banned**: unpopular ideas, heterodox views, criticism of consensus, sharp disagreement
-- Moderation is flag-based: community flags → human review (founding team initially)
-- Bans are public with stated reason (transparency over secrecy)
+- **Banned**: ad hominem, authority-as-argument, coercion, intimidation, anything that chills others' free speech
+- **Not banned**: unpopular ideas, heterodox views, sharp disagreement, criticism of consensus
+- Flag-based: community flags → human review; bans are public with stated reason
 
 ### 6. Authentication
-- ORCID OAuth only
-- On first login: link ORCID profile, choose display name
-- Sessions via standard JWT/cookie
+- ORCID OAuth only; on first login choose display name
+- Sessions via httpOnly cookies
 
 ---
 
-## Out of Scope (MVP)
-- Semantic Scholar / Gap Map integration
-- Paper recommendation engine
-- Private groups or DMs
-- Mobile app
+## Phase 2 Integrations
+- [Gap Map](https://www.gap-map.org) — surface under-explored research areas alongside papers
+- [Semantic Scholar](https://www.semanticscholar.org) — citations, related papers, cross-references
+- [Convergent Research](https://www.convergentresearch.org) — link papers to focused research projects
 
 ---
 
 ## Technical Stack
-- **Frontend/Backend**: Next.js 15 (App Router, TypeScript)
-- **Database**: PostgreSQL via Supabase
-- **Auth**: ORCID OAuth (custom OAuth flow) + Supabase session management
-- **Styling**: Tailwind CSS + shadcn/ui
-- **Paper rendering**: arXiv HTML (`arxiv.org/html/{id}`) with PDF.js fallback
-- **Deployment**: Vercel
+- Next.js 15 (App Router, TypeScript) · Supabase (PostgreSQL) · Tailwind + shadcn/ui
+- Auth: ORCID OAuth (custom flow) + httpOnly cookie session
+- Paper rendering: arXiv HTML proxied server-side + PDF.js fallback
+- Deployment: Vercel
 
 ---
 
@@ -71,14 +79,16 @@ Anyone who creates an ORCID account (free, open, no institutional affiliation re
 
 | Risk | Mitigation |
 |------|-----------|
-| arXiv HTML not available for all papers | PDF.js fallback; degrade gracefully |
-| Text anchors break on version update | Hash-based matching; archive orphans, don't delete |
-| ORCID OAuth complexity | Use ORCID's standard OAuth 2.0 flow; test thoroughly |
-| Cold start / empty platform feel | Seed with pre-written annotations on landmark papers before public launch |
+| arXiv HTML unavailable for some papers | PDF.js fallback |
+| Text anchors break on version update | Hash-based matching; archive orphans |
+| Supabase RLS uses auth.uid() but we use custom cookies | Use service role key for server-side writes |
+| Cold start / empty platform | Seed landmark papers with pre-written annotations |
 
 ---
 
-## Non-Goals
-- Do not recreate peer review (we're building criticism culture, not publishing)
-- Do not rank users by prestige or credentials
-- Do not algorithmically amplify content (no feed algorithm)
+## Non-Goals (MVP)
+- No peer review recreation
+- No user prestige ranking
+- No feed algorithm
+- No Gap Map / Semantic Scholar integration (Phase 2)
+- No mobile app
