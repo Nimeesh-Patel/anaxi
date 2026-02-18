@@ -4,12 +4,20 @@
 const ORCID_BASE = "https://orcid.org";
 const ORCID_API = "https://pub.orcid.org/v3.0";
 
+// NEXT_PUBLIC_APP_URL must be set in Vercel env vars to https://anaxi.vercel.app
+// Falls back to VERCEL_URL (auto-set by Vercel) for preview deployments
+function getAppUrl(): string {
+  if (process.env.NEXT_PUBLIC_APP_URL) return process.env.NEXT_PUBLIC_APP_URL;
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  return "http://localhost:3000";
+}
+
 export function getAuthorizationUrl(state: string): string {
   const params = new URLSearchParams({
     client_id: process.env.ORCID_CLIENT_ID!,
     response_type: "code",
     scope: "/authenticate",
-    redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/callback/orcid`,
+    redirect_uri: `${getAppUrl()}/api/auth/callback/orcid`,
     state,
   });
   return `${ORCID_BASE}/oauth/authorize?${params}`;
@@ -28,7 +36,7 @@ export async function exchangeCode(code: string): Promise<{
       client_secret: process.env.ORCID_CLIENT_SECRET!,
       grant_type: "authorization_code",
       code,
-      redirect_uri: `${process.env.NEXT_PUBLIC_APP_URL}/api/auth/callback/orcid`,
+      redirect_uri: `${getAppUrl()}/api/auth/callback/orcid`,
     }),
   });
 

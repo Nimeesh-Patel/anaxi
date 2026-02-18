@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { exchangeCode } from "@/lib/orcid/oauth";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const { orcid, access_token, name } = await exchangeCode(code);
-    const supabase = await createClient();
+    const supabase = createAdminClient();
 
     // Upsert user record
     const { data: user, error: dbError } = await supabase

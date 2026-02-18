@@ -1,0 +1,50 @@
+- I think most of the current research institutions are bad because:
+    - their bureaucracy and coercive policies stagnate knowledge creation.
+    - they are structured in such a way that they prevent progress in fundamental theories, or creating new fundamental theories.
+- The only research institute which I think is currently doing good is the Conjecture Institute: https://www.conjectureinstitute.org/
+- I don't know how I can start making [[research institution]], so I thought of making this project as an adjacent, incremental, but fairly independent solution.
+- This could create the culture which would then allow for the creation of [[research institution]] because this would be an online thing and hence may have more reach.
+- # Problem
+    - Research is gate kept in academia. Or at least the common understanding is that a person, just by taking interest and continuing to understand the problems better, cannot make any new contributions or solve previously unsolved problems.
+    - People don't know where they could access the best research and scientific culture and tradition of criticism.
+- # Proposed Solution
+    - Creating a culture of criticism on a website, which is focused on [[knowledge]] creation.
+    - A public website that makes research papers easy to discover, understand, debate, and criticise.
+    - It fetches papers from arXiv (using its API), presents them in a clean, readable format, and lets people discuss them seriously.
+    - Basically digitising the whole scientific and research culture and institutions so it has a wider reach.
+    - A way of creating a new culture of criticism, and opening and open sourcing science and the Enlightenment.
+- ## Culture
+    - What creates a tradition of criticism?
+        - Flat hierarchies.
+        - Truth is not obvious.
+        - Accepting or rejecting ideas according to their content and not their origin.
+        - Everyone is fallible - even the greatest minds can easily make mistakes.
+        - Most trivial-seeming objection may be the key to a great new discovery.
+    - People are valuable because they are different. Everybody is unfathomably different from everyone else. That fact is not being harnessed enough, and can be harnessed more.
+- ## Functional Details
+    - Mandatory ORCID id login (to mod people). ORCID: https://orcid.org/ (API: https://info.orcid.org/documentation/integration-guide/ )
+    - Moderation is necessary because:
+        - Tolerance needs to be defended.
+        - Anti-rational ideas such as Ad hominem, coercion, imposing authority should not be tolerated.
+        - If someone uses free speech to create an environment of intimidation and fear—one in which others are afraid to exercise their own free speech—then it isn’t free speech and shouldn’t be tolerated.
+    - ORCID id is necessary because:
+        - It will prevent spam/bots.
+        - is free, open source, fast (2-3 mins) to create, and doesn't require institutional id. So it won't gatekeep anyone who is really interested.
+        - would provide people a sense of being a part of the culture.
+    - Pulls papers from arXiv: https://arxiv.org/ (API: https://info.arxiv.org/help/api/index.html )
+    - There would be a way to comment directly on specific parts or sections of the paper; just like there is comment option in google docs. It could include features like:
+        - Show other people's comments; like "number of highlights" in kindle.
+        - A system to rank the best explanations or criticisms someone gives to the specific parts.
+        - Some features inspired by Grokipedia.
+    - I have been eyeing these two projects/services as well, I think they could be integrated here:
+        - https://www.convergentresearch.org/
+        - https://www.gap-map.org/?sort=rank (API: https://www.gap-map.org/api/ )
+        - https://www.semanticscholar.org/ (API: https://www.semanticscholar.org/product/api )
+- ## Non-Functional Details
+    - The UI and UX should be modern, and not like government or boring academic sites.
+    - UI/UX could be inspired by our best engaging social media sites, like Twitter (X).
+- # Sub Problems
+    - How to create a culture of criticism on the app?
+    - How to make people engage with the app?
+    - How to inculcate the peer review process into this?
+    - How to digitize the best research culture and institutions such that anyone can access and pick this up - not just "a" research culture, but the *best* culture. And how can people easily access our best theories of reality and also understand the unsolved problems, so that they are really in par with the best knowledge and start solving real problems?

@@ -36,6 +36,7 @@ export async function searchPapers(
   });
 
   const res = await fetch(`${ARXIV_API}?${params}`, {
+    headers: { "User-Agent": "Anaxi/1.0 (open science platform)" },
     next: { revalidate: 300 }, // cache 5 min
   });
 
@@ -101,6 +102,7 @@ export async function getPaper(id: string): Promise<ArxivPaper | null> {
     id_list: id,
   });
   const res = await fetch(`${ARXIV_API}?${params}`, {
+    headers: { "User-Agent": "Anaxi/1.0 (open science platform)" },
     next: { revalidate: 3600 },
   });
   if (!res.ok) return null;
