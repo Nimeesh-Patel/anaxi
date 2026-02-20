@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -15,12 +15,24 @@ export function DiscussionSection({ paperId }: Props) {
   const [posting, setPosting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function load() {
+  const load = useCallback(async () => {
     const res = await fetch(`/api/comments?paper_id=${encodeURIComponent(paperId)}`);
     if (res.ok) setComments(await res.json());
-  }
+  }, [paperId]);
 
-  useEffect(() => { load(); }, [paperId]);
+  useEffect(() => {
+    let cancelled = false;
+
+    void fetch(`/api/comments?paper_id=${encodeURIComponent(paperId)}`)
+      .then(async (res) => {
+        if (!res.ok || cancelled) return;
+        setComments(await res.json());
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [paperId]);
 
   async function handlePost(e: React.FormEvent) {
     e.preventDefault();
