@@ -20,31 +20,57 @@ export default async function HomePage({ searchParams }: Props) {
   const totalPages = result ? Math.ceil(Math.min(result.total, 1000) / pageSize) : 1;
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-1">
-        <h1 className="text-xl font-semibold">Discover Papers</h1>
-        <p className="text-sm text-muted-foreground">
-          Search arXiv. Annotate. Criticise.
-        </p>
-      </div>
+    <div className="space-y-8">
+      {!query && (
+        <div className="py-10 space-y-5">
+          <div className="space-y-2">
+            <h1 className="text-3xl font-bold tracking-tight">
+              Open science. Radical criticism.
+            </h1>
+            <p className="text-muted-foreground max-w-xl leading-relaxed">
+              arXiv papers, annotated and debated by anyone with an idea worth
+              defending. No gatekeeping. No authority. Just arguments.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+            <span>Flat hierarchies</span>
+            <span>·</span>
+            <span>Ideas judged on merit, not origin</span>
+            <span>·</span>
+            <span>Everyone is fallible</span>
+            <span>·</span>
+            <span>Most trivial objection may be the key to a great discovery</span>
+          </div>
+        </div>
+      )}
+
+      {query && (
+        <div className="pt-2 space-y-1">
+          <h1 className="text-lg font-semibold">Results for &ldquo;{query}&rdquo;</h1>
+          {result && (
+            <p className="text-xs text-muted-foreground">
+              {result.total.toLocaleString()} papers found
+            </p>
+          )}
+        </div>
+      )}
 
       <SearchBar defaultValue={query} />
 
       {!query && (
         <p className="text-sm text-muted-foreground">
-          Search for a topic, author, or arXiv ID to get started.
+          Search a topic, author, or arXiv ID to get started.
         </p>
       )}
 
       {result && result.papers.length === 0 && (
-        <p className="text-sm text-muted-foreground">No papers found for &ldquo;{query}&rdquo;.</p>
+        <p className="text-sm text-muted-foreground">
+          No papers found for &ldquo;{query}&rdquo;.
+        </p>
       )}
 
       {result && result.papers.length > 0 && (
         <>
-          <p className="text-xs text-muted-foreground">
-            {result.total.toLocaleString()} results
-          </p>
           <div className="divide-y">
             {result.papers.map((paper) => (
               <PaperCard key={paper.id} paper={paper} />
@@ -52,7 +78,7 @@ export default async function HomePage({ searchParams }: Props) {
           </div>
 
           {totalPages > 1 && (
-            <div className="flex gap-4 items-center justify-center pt-4">
+            <div className="flex gap-4 items-center justify-center pt-2 pb-4">
               {currentPage > 1 && (
                 <a
                   href={`/?q=${encodeURIComponent(query!)}&page=${currentPage - 1}`}

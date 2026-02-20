@@ -8,9 +8,9 @@ export async function Navbar() {
   const session = await getSession();
 
   return (
-    <nav className="border-b">
+    <nav className="border-b bg-background/95 backdrop-blur-sm sticky top-0 z-40">
       <div className="max-w-4xl mx-auto px-4 h-14 flex items-center justify-between">
-        <Link href="/" className="font-semibold tracking-tight">
+        <Link href="/" className="font-bold tracking-tight text-lg">
           Anaxi
         </Link>
         <div className="flex items-center gap-3">
@@ -18,9 +18,9 @@ export async function Navbar() {
             <>
               <Link
                 href={`/profile/${session.orcid}`}
-                className="text-sm text-muted-foreground hover:text-foreground"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
-                {session.orcid}
+                Profile
               </Link>
               <form action="/auth/logout" method="POST">
                 <Button variant="outline" size="sm" type="submit">

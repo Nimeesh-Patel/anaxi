@@ -23,12 +23,20 @@ export default async function LoginPage({ searchParams }: Props) {
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-background">
-      <div className="max-w-md w-full mx-auto px-6 text-center space-y-6">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Anaxi</h1>
-          <p className="text-muted-foreground mt-2 text-sm">
-            Open science criticism — papers, annotations, debate.
+      <div className="max-w-sm w-full mx-auto px-6 space-y-8">
+        <div className="space-y-3">
+          <h1 className="text-3xl font-bold tracking-tight">Anaxi</h1>
+          <p className="text-muted-foreground leading-relaxed">
+            Papers, annotations, and serious debate — grounded in the idea that
+            anyone can make a real contribution, and every argument stands or
+            falls on its own merit.
           </p>
+        </div>
+
+        <div className="space-y-3 text-xs text-muted-foreground border-l-2 border-primary/30 pl-4">
+          <p>Flat hierarchies. No authority arguments.</p>
+          <p>Everyone is fallible — including the greatest minds.</p>
+          <p>The most trivial objection may be key to a great discovery.</p>
         </div>
 
         {error && (
@@ -42,15 +50,17 @@ export default async function LoginPage({ searchParams }: Props) {
           </div>
         )}
 
-        <a href={orcidUrl}>
-          <Button className="w-full gap-2">
-            Sign in with ORCID
-          </Button>
-        </a>
-        <p className="text-xs text-muted-foreground">
-          ORCID is free to create and open to anyone. No institutional
-          affiliation required.
-        </p>
+        <div className="space-y-3">
+          <a href={orcidUrl}>
+            <Button className="w-full" size="lg">
+              Sign in with ORCID
+            </Button>
+          </a>
+          <p className="text-xs text-muted-foreground text-center">
+            ORCID is free, open, and takes 2–3 minutes to create. No
+            institutional affiliation needed.
+          </p>
+        </div>
       </div>
     </main>
   );
