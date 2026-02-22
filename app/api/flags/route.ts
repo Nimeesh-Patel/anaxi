@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getSession } from "@/lib/session";
 
 const VALID_REASONS = ["ad_hominem", "coercion", "intimidation", "other"] as const;
@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid flag" }, { status: 400 });
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
 
   const { error } = await supabase.from("flags").insert({
     user_id: session.id,

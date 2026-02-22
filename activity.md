@@ -27,9 +27,7 @@ PRD and plan updated with improved vision (2026-02-18).
 - Annotation sidebar (list all annotations on a paper) with upvoting + sort
 - Wire up annotation archiving on paper version update
 - Vote score display on comments
-- Fix Supabase RLS: switch to service role key for server-side writes (current policies use auth.uid() which doesn't match custom cookie session)
 - `.env.local` setup guide
 
 ## Known Issues
 - Annotation highlights not shown in iframe (infrastructure exists, display missing)
-- Supabase RLS policies incompatible with custom cookie session — use service role on server
