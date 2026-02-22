@@ -16,10 +16,13 @@ export type ArxivPaper = {
 };
 
 function parseId(rawId: string): { id: string; version: number } {
-  // rawId: "http://arxiv.org/abs/2307.09288v2"
-  const match = rawId.match(/(\d{4}\.\d{4,5})(v(\d+))?$/);
-  if (!match) return { id: rawId, version: 1 };
-  return { id: match[1], version: match[3] ? parseInt(match[3]) : 1 };
+  // New-style: "http://arxiv.org/abs/2307.09288v2"
+  const newStyle = rawId.match(/(\d{4}\.\d{4,5})(v(\d+))?$/);
+  if (newStyle) return { id: newStyle[1], version: newStyle[3] ? parseInt(newStyle[3]) : 1 };
+  // Old-style: "http://arxiv.org/abs/hep-ex/0307015v1"
+  const oldStyle = rawId.match(/([a-z-]+\/\d{7})(v(\d+))?$/);
+  if (oldStyle) return { id: oldStyle[1], version: oldStyle[3] ? parseInt(oldStyle[3]) : 1 };
+  return { id: rawId, version: 1 };
 }
 
 
@@ -51,7 +54,7 @@ function parseAtomFeed(xml: string): { papers: ArxivPaper[]; total: number } {
   const totalMatch = xml.match(/<opensearch:totalResults[^>]*>(\d+)<\/opensearch:totalResults>/);
   const total = totalMatch ? parseInt(totalMatch[1]) : 0;
 
-  const entryRegex = /<entry>([\s\S]*?)<\/entry>/g;
+  const entryRegex = /<entry[^>]*>([\s\S]*?)<\/entry>/g;
   const papers: ArxivPaper[] = [];
   let match;
 
@@ -66,7 +69,7 @@ function parseAtomFeed(xml: string): { papers: ArxivPaper[]; total: number } {
     const { id, version } = parseId(rawId);
 
     const authors: string[] = [];
-    const authorRegex = /<author>[\s\S]*?<name>([\s\S]*?)<\/name>[\s\S]*?<\/author>/g;
+    const authorRegex = /<author[^>]*>[\s\S]*?<name[^>]*>([\s\S]*?)<\/name>[\s\S]*?<\/author>/g;
     let am;
     while ((am = authorRegex.exec(entry)) !== null) {
       authors.push(am[1].trim());
