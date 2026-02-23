@@ -37,15 +37,14 @@ export async function getComments(
     .order("created_at", { ascending: true });
 
   if (error) throw new Error(`Supabase: ${error.message}`);
-  return (data ?? []).map((row) => ({
-    id: row.id,
-    paper_id: row.paper_id,
-    user_id: row.user_id,
-    parent_id: row.parent_id,
-    content: row.content,
-    created_at: row.created_at,
-    display_name: (row.users as unknown as { display_name: string } | null)
-      ?.display_name,
+  return (data ?? []).map((row: Record<string, unknown>) => ({
+    id: row.id as string,
+    paper_id: row.paper_id as string,
+    user_id: row.user_id as string,
+    parent_id: (row.parent_id as string | null) ?? null,
+    content: row.content as string,
+    created_at: row.created_at as string,
+    display_name: ((row.users as { display_name?: string } | null) ?? null)?.display_name,
   }));
 }
 

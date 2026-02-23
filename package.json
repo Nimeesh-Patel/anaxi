@@ -1,7 +1,10 @@
 {
   "name": "anaxi",
   "private": true,
-  "workspaces": ["apps/*", "packages/*"],
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
   "scripts": {
     "dev": "npm run dev --workspace=apps/web",
     "build": "npm run build --workspace=apps/web",
@@ -11,5 +14,8 @@
     "build:libs": "npm run build --workspace=@anaxi/arxiv && npm run build --workspace=@anaxi/semantic-scholar && npm run build --workspace=@anaxi/database",
     "build:mcp": "npm run build:libs && npm run build --workspace=apps/mcp",
     "build:packages": "npm run build:libs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.96.0"
   }
 }
