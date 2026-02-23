@@ -9,16 +9,75 @@ const tools = [
   {
     type: "function" as const,
     function: {
-      name: "search_arxiv",
-      description: "Search arXiv papers by query string.",
+      name: "search_papers",
+      description: "Search arXiv papers by keyword, author, or topic.",
       parameters: {
         type: "object",
         properties: {
-          query: { type: "string", description: "Search phrase" },
+          query: { type: "string", description: "Search query" },
           start: { type: "integer", minimum: 0 },
           max_results: { type: "integer", minimum: 1, maximum: 20 },
         },
         required: ["query"],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "get_paper",
+      description: "Fetch metadata for a specific arXiv paper by ID.",
+      parameters: {
+        type: "object",
+        properties: {
+          arxiv_id: { type: "string", description: "arXiv ID e.g. 1706.03762" },
+        },
+        required: ["arxiv_id"],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "search_semantic_scholar",
+      description: "Search Semantic Scholar — returns citation counts and TL;DR summaries.",
+      parameters: {
+        type: "object",
+        properties: {
+          query: { type: "string" },
+          limit: { type: "integer", minimum: 1, maximum: 20 },
+        },
+        required: ["query"],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "get_paper_references",
+      description: "Get papers cited by a given arXiv paper.",
+      parameters: {
+        type: "object",
+        properties: {
+          arxiv_id: { type: "string" },
+          limit: { type: "integer", minimum: 1, maximum: 20 },
+        },
+        required: ["arxiv_id"],
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "get_paper_citations",
+      description: "Get papers that cite a given arXiv paper.",
+      parameters: {
+        type: "object",
+        properties: {
+          arxiv_id: { type: "string" },
+          limit: { type: "integer", minimum: 1, maximum: 20 },
+        },
+        required: ["arxiv_id"],
       },
     },
   },
