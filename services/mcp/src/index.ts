@@ -12,16 +12,20 @@ import {
   getSemanticScholarReferences,
   getSemanticScholarCitations,
 } from "./tools/semantic-scholar.js";
+import {
+  getComments,
+  postComment,
+  savePaper,
+  unsavePaper,
+  listSavedPapers,
+} from "./tools/supabase.js";
 
 const server = new McpServer({
   name: "anaxi",
   version: "0.1.0",
 });
 
-// ── helper ────────────────────────────────────────────────────────────────────
-// TypeScript 5.9 + Zod 4 hits TS2589 (type instantiation too deep) with MCP
-// SDK's complex ZodRawShapeCompat generics. Cast config to `any` to sidestep
-// the constraint check; runtime Zod validation is unaffected.
+// TypeScript 5.9 + Zod 4 hits TS2589 with MCP SDK generics. Cast to any.
 type ToolConfig = {
   description: string;
   inputSchema: Record<string, z.ZodTypeAny>;
@@ -36,10 +40,10 @@ function registerTool<T extends Record<string, unknown>>(
   server.registerTool(name, config as any, handler as any);
 }
 
-// ── arXiv tools ───────────────────────────────────────────────────────────────
+// ── arXiv tools (public) ──────────────────────────────────────────────────────
 
 registerTool<{ query: string; start?: number; max_results?: number }>(
-  "search_arxiv",
+  "search_papers",
   {
     description:
       "Search arXiv for papers by keyword, author, or topic. Returns title, authors, abstract, categories, and links.",
@@ -64,7 +68,7 @@ registerTool<{ query: string; start?: number; max_results?: number }>(
 );
 
 registerTool<{ arxiv_id: string }>(
-  "get_arxiv_paper",
+  "get_paper",
   {
     description:
       "Fetch metadata for a specific arXiv paper by its ID (e.g. '1706.03762' or 'hep-ex/0307015').",
@@ -87,10 +91,10 @@ registerTool<{ arxiv_id: string }>(
 );
 
 registerTool<{ arxiv_id: string }>(
-  "get_arxiv_paper_text",
+  "get_paper_text",
   {
     description:
-      "Fetch the full text content of an arXiv paper's HTML version (if available). Returns plain text stripped of HTML tags.",
+      "Fetch the full text of an arXiv paper's HTML version (if available). Returns plain text stripped of HTML tags.",
     inputSchema: {
       arxiv_id: z.string().describe("arXiv paper ID, e.g. '2307.09288'"),
     },
@@ -102,7 +106,7 @@ registerTool<{ arxiv_id: string }>(
         content: [
           {
             type: "text" as const,
-            text: `No HTML version available for '${arxiv_id}'. Try get_arxiv_paper for metadata only.`,
+            text: `No HTML version available for '${arxiv_id}'. Try get_paper for metadata only.`,
           },
         ],
         isError: true,
@@ -114,13 +118,13 @@ registerTool<{ arxiv_id: string }>(
   }
 );
 
-// ── Semantic Scholar tools ────────────────────────────────────────────────────
+// ── Semantic Scholar tools (public) ──────────────────────────────────────────
 
 registerTool<{ query: string; limit?: number }>(
   "search_semantic_scholar",
   {
     description:
-      "Search Semantic Scholar for papers. Returns richer data than arXiv search: citation counts, TL;DR summaries, and open-access PDF links.",
+      "Search Semantic Scholar for papers. Returns citation counts, TL;DR summaries, and open-access PDF links.",
     inputSchema: {
       query: z.string().describe("Search query"),
       limit: z
@@ -144,7 +148,7 @@ registerTool<{ arxiv_id: string }>(
   "get_semantic_scholar_paper",
   {
     description:
-      "Get detailed metadata for a paper via Semantic Scholar using its arXiv ID. Includes citation count, TL;DR, references count, and open-access PDF URL.",
+      "Get detailed metadata for a paper via Semantic Scholar using its arXiv ID. Includes citation count, TL;DR, and open-access PDF URL.",
     inputSchema: {
       arxiv_id: z.string().describe("arXiv paper ID, e.g. '1706.03762'"),
     },
@@ -153,12 +157,7 @@ registerTool<{ arxiv_id: string }>(
     const paper = await getSemanticScholarPaper(arxiv_id);
     if (!paper) {
       return {
-        content: [
-          {
-            type: "text" as const,
-            text: `Paper '${arxiv_id}' not found on Semantic Scholar.`,
-          },
-        ],
+        content: [{ type: "text" as const, text: `Paper '${arxiv_id}' not found on Semantic Scholar.` }],
         isError: true,
       };
     }
@@ -171,16 +170,10 @@ registerTool<{ arxiv_id: string }>(
 registerTool<{ arxiv_id: string; limit?: number }>(
   "get_paper_references",
   {
-    description: "Get the list of papers that a given arXiv paper cites (its reference list).",
+    description: "Get the list of papers that a given arXiv paper cites.",
     inputSchema: {
       arxiv_id: z.string().describe("arXiv paper ID"),
-      limit: z
-        .number()
-        .int()
-        .min(1)
-        .max(100)
-        .optional()
-        .describe("Max references to return (default 20)"),
+      limit: z.number().int().min(1).max(100).optional().describe("Max references (default 20)"),
     },
   },
   async ({ arxiv_id, limit }) => {
@@ -194,22 +187,107 @@ registerTool<{ arxiv_id: string; limit?: number }>(
 registerTool<{ arxiv_id: string; limit?: number }>(
   "get_paper_citations",
   {
-    description: "Get papers that cite a given arXiv paper (who cited it).",
+    description: "Get papers that cite a given arXiv paper.",
     inputSchema: {
       arxiv_id: z.string().describe("arXiv paper ID"),
-      limit: z
-        .number()
-        .int()
-        .min(1)
-        .max(100)
-        .optional()
-        .describe("Max citations to return (default 20)"),
+      limit: z.number().int().min(1).max(100).optional().describe("Max citations (default 20)"),
     },
   },
   async ({ arxiv_id, limit }) => {
     const citations = await getSemanticScholarCitations(arxiv_id, limit ?? 20);
     return {
       content: [{ type: "text" as const, text: JSON.stringify(citations, null, 2) }],
+    };
+  }
+);
+
+// ── Supabase tools ────────────────────────────────────────────────────────────
+// Public: get_comments
+// Authenticated: post_comment, save_paper, unsave_paper, list_saved_papers
+// Auth model: caller passes user_id (UUID from users table).
+// MCP uses service role key to operate on behalf of any user.
+
+registerTool<{ paper_id: string }>(
+  "get_comments",
+  {
+    description: "Fetch all paper-level discussion comments for an arXiv paper.",
+    inputSchema: {
+      paper_id: z.string().describe("arXiv paper ID, e.g. '2307.09288'"),
+    },
+  },
+  async ({ paper_id }) => {
+    const comments = await getComments(paper_id);
+    return {
+      content: [{ type: "text" as const, text: JSON.stringify(comments, null, 2) }],
+    };
+  }
+);
+
+registerTool<{ paper_id: string; content: string; user_id: string; parent_id?: string }>(
+  "post_comment",
+  {
+    description: "Post a comment on a paper's discussion thread. Requires the user's UUID.",
+    inputSchema: {
+      paper_id: z.string().describe("arXiv paper ID"),
+      content: z.string().min(1).describe("Comment text"),
+      user_id: z.string().uuid().describe("The authenticated user's UUID from the users table"),
+      parent_id: z.string().uuid().optional().describe("Parent comment UUID for threaded replies"),
+    },
+  },
+  async ({ paper_id, content, user_id, parent_id }) => {
+    const comment = await postComment(paper_id, content, user_id, parent_id);
+    return {
+      content: [{ type: "text" as const, text: JSON.stringify(comment, null, 2) }],
+    };
+  }
+);
+
+registerTool<{ paper_id: string; user_id: string }>(
+  "save_paper",
+  {
+    description: "Save an arXiv paper to the user's reading list.",
+    inputSchema: {
+      paper_id: z.string().describe("arXiv paper ID"),
+      user_id: z.string().uuid().describe("The authenticated user's UUID"),
+    },
+  },
+  async ({ paper_id, user_id }) => {
+    await savePaper(paper_id, user_id);
+    return {
+      content: [{ type: "text" as const, text: `Paper '${paper_id}' saved.` }],
+    };
+  }
+);
+
+registerTool<{ paper_id: string; user_id: string }>(
+  "unsave_paper",
+  {
+    description: "Remove an arXiv paper from the user's reading list.",
+    inputSchema: {
+      paper_id: z.string().describe("arXiv paper ID"),
+      user_id: z.string().uuid().describe("The authenticated user's UUID"),
+    },
+  },
+  async ({ paper_id, user_id }) => {
+    await unsavePaper(paper_id, user_id);
+    return {
+      content: [{ type: "text" as const, text: `Paper '${paper_id}' removed from saved list.` }],
+    };
+  }
+);
+
+registerTool<{ user_id: string }>(
+  "list_saved_papers",
+  {
+    description: "List all papers saved by a user.",
+    inputSchema: {
+      user_id: z.string().uuid().describe("The authenticated user's UUID"),
+    },
+  },
+  async ({ user_id }) => {
+    const saved = await listSavedPapers(user_id);
+    return {
+      content: [{ type: "text" as const, text: JSON.stringify(saved, null, 2) }],
     };
   }
 );

@@ -3,7 +3,8 @@
     "allow": [
       "Bash(ls:*)",
       "Bash(powershell -Command:*)",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "Bash(git mv:*)"
     ]
   }
 }

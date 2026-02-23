@@ -56,8 +56,17 @@ create table flags (
   unique(user_id, target_id)
 );
 
+create table saved_papers (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid references users(id) on delete cascade,
+  paper_id text not null,
+  saved_at timestamptz default now(),
+  unique(user_id, paper_id)
+);
+
 -- Indexes
 create index on annotations(paper_id);
+create index on saved_papers(user_id);
 create index on annotations(text_hash);
 create index on comments(paper_id);
 create index on comments(annotation_id);
@@ -71,6 +80,7 @@ alter table annotations enable row level security;
 alter table comments enable row level security;
 alter table votes enable row level security;
 alter table flags enable row level security;
+alter table saved_papers enable row level security;
 
 -- RLS policies: read-public, write-own
 create policy "Public read users" on users for select using (true);
@@ -88,3 +98,5 @@ create policy "Public read votes" on votes for select using (true);
 create policy "Manage own votes" on votes for all using (auth.uid()::text = user_id::text);
 
 create policy "Insert own flag" on flags for insert with check (auth.uid()::text = user_id::text);
+
+create policy "Manage own saved papers" on saved_papers for all using (auth.uid()::text = user_id::text);
