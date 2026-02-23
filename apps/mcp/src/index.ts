@@ -28,6 +28,14 @@ const toolHandlers: Record<string, (args: Args) => Promise<ToolResult>> = {
 };
 
 const PORT = parseInt(process.env.PORT ?? "3001", 10);
+const MCP_SERVER_TOKEN = process.env.MCP_SERVER_TOKEN;
+
+
+function isAuthorized(req: express.Request): boolean {
+  if (!MCP_SERVER_TOKEN) return true;
+  const token = req.header("x-mcp-token");
+  return token === MCP_SERVER_TOKEN;
+}
 
 function createServer(): McpServer {
   const server = new McpServer({
@@ -83,6 +91,10 @@ app.get("/health", (_req, res) => {
 
 // REST endpoint for the web app: POST /tools/:name with JSON body args
 app.post("/tools/:name", express.json(), async (req, res) => {
+  if (!isAuthorized(req)) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
   const { name } = req.params;
   const handler = toolHandlers[name];
   if (!handler) {
@@ -111,4 +123,7 @@ const host = process.env.HOST ?? "0.0.0.0";
 app.listen(PORT, host, () => {
   console.log(`Anaxi MCP server listening on ${host}:${PORT}`);
   console.log(`MCP endpoint: POST /mcp`);
+  if (MCP_SERVER_TOKEN) {
+    console.log("REST tools auth enabled (x-mcp-token required).");
+  }
 });

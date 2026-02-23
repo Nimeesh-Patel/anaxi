@@ -8,7 +8,8 @@
     "start": "npm run start --workspace=apps/web",
     "lint": "npm run lint --workspace=apps/web",
     "dev:mcp": "npm run dev --workspace=apps/mcp",
-    "build:mcp": "npm run build --workspace=apps/mcp",
-    "build:packages": "npm run build --workspaces --if-present"
+    "build:libs": "npm run build --workspace=@anaxi/arxiv && npm run build --workspace=@anaxi/semantic-scholar && npm run build --workspace=@anaxi/database",
+    "build:mcp": "npm run build:libs && npm run build --workspace=apps/mcp",
+    "build:packages": "npm run build:libs"
   }
 }
