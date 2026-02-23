@@ -2,6 +2,7 @@
 // Exposes /mcp (MCP protocol) and /tools/:name (REST for web app)
 
 import express from "express";
+import cors from "cors";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { createMcpExpressApp } from "@modelcontextprotocol/sdk/server/express.js";
@@ -46,6 +47,16 @@ function createServer(): McpServer {
 const app = createMcpExpressApp({
   host: process.env.HOST ?? "0.0.0.0",
   allowedHosts: process.env.ALLOWED_HOSTS?.split(",").filter(Boolean).map((h) => h.trim()),
+});
+
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST"],
+  allowedHeaders: ["Content-Type", "Authorization", "Accept", "x-mcp-token"],
+}));
+
+app.get("/", (_req, res) => {
+  res.json({ name: "anaxi-mcp", version: "1.0.0", protocol: "mcp", endpoint: "/mcp" });
 });
 
 app.post("/mcp", async (req, res) => {

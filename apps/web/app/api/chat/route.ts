@@ -3,7 +3,7 @@ import { ChatMessage, createSarvamChatCompletion } from "@/lib/sarvam";
 
 const MCP_URL = process.env.MCP_URL ?? "http://localhost:3001";
 const MCP_SERVER_TOKEN = process.env.MCP_SERVER_TOKEN;
-const SARVAM_MODEL = process.env.SARVAM_MODEL ?? "sarvam-105b";
+const SARVAM_MODEL = process.env.SARVAM_MODEL ?? "sarvam-m";
 
 const tools = [
   {
