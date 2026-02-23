@@ -98,7 +98,7 @@ export async function searchArxiv(
   });
 
   const res = await fetch(`${ARXIV_API}?${params}`, {
-    headers: { "User-Agent": userAgent },
+    headers: { "User-Agent": "Anaxi-MCP/1.0 (nimeeshpatel04@gmail.com)" },
   });
   if (!res.ok) throw new Error(`arXiv API error: ${res.status}`);
   return parseAtomFeed(await res.text());
