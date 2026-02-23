@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import type { ArxivPaper } from "@/lib/arxiv/api";
+import type { ArxivPaper } from "@/lib/mcp";
 import { PaperHtml } from "./paper-html";
 import { PaperPdf } from "./paper-pdf";
 

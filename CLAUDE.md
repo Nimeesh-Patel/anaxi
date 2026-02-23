@@ -1,3 +1,9 @@
+# IMPORTANT OVERALL
+
+Don't waste tokens ruminating too much. If something is confusing, use AskUserQuestion tool.
+
+Main intention should be implementations and solving problems.
+
 # Workflow
 
 If (first pass) {

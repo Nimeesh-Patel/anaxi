@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getPaper } from "@/lib/arxiv/api";
+import { getPaper } from "@/lib/mcp";
 import { PaperViewer } from "@/components/paper/paper-viewer";
 import { DiscussionSection } from "@/components/discussion/discussion-section";
 import { Badge } from "@/components/ui/badge";

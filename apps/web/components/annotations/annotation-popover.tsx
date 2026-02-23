@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import type { ArxivPaper } from "@/lib/arxiv/api";
+import type { ArxivPaper } from "@/lib/mcp";
 
 type Selection = {
   text: string;

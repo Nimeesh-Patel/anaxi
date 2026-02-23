@@ -1,13 +1,14 @@
 {
   "name": "anaxi",
   "private": true,
-  "workspaces": ["apps/*", "services/*"],
+  "workspaces": ["apps/*", "packages/*"],
   "scripts": {
     "dev": "npm run dev --workspace=apps/web",
     "build": "npm run build --workspace=apps/web",
     "start": "npm run start --workspace=apps/web",
     "lint": "npm run lint --workspace=apps/web",
-    "dev:mcp": "npm run dev --workspace=services/mcp",
-    "build:mcp": "npm run build --workspace=services/mcp"
+    "dev:mcp": "npm run dev --workspace=apps/mcp",
+    "build:mcp": "npm run build --workspace=apps/mcp",
+    "build:packages": "npm run build --workspaces --if-present"
   }
 }

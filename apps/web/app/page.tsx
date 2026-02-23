@@ -1,4 +1,4 @@
-import { searchPapers } from "@/lib/arxiv/api";
+import { searchPapers } from "@/lib/mcp";
 import { SearchBar } from "@/components/search-bar";
 import { PaperCard } from "@/components/paper/paper-card";
 

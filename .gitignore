@@ -19,7 +19,8 @@ apps/web/out/
 /.next/
 
 # mcp build output
-services/mcp/dist/
+apps/mcp/dist/
+packages/*/dist/
 
 # production
 /build

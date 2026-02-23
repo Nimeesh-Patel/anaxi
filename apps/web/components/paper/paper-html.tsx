@@ -5,7 +5,7 @@
 // The AnnotationPopover listens and lets users create annotations.
 
 import { useEffect, useRef, useState } from "react";
-import type { ArxivPaper } from "@/lib/arxiv/api";
+import type { ArxivPaper } from "@/lib/mcp";
 import { AnnotationPopover } from "@/components/annotations/annotation-popover";
 
 type Selection = {

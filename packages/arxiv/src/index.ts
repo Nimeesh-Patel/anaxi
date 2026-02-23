@@ -1,5 +1,5 @@
-// arXiv API tools for MCP
-// API docs: https://info.arxiv.org/help/api/index.html
+// Pure arXiv API client — shared by web app and MCP
+// Docs: https://info.arxiv.org/help/api/index.html
 
 const ARXIV_API = "https://export.arxiv.org/api/query";
 
@@ -15,6 +15,7 @@ export type ArxivPaper = {
   htmlUrl: string;
   pdfUrl: string;
   absUrl: string;
+  hasHtml?: boolean; // whether arxiv.org/html/{id} is likely available (for web)
 };
 
 function parseId(rawId: string): { id: string; version: number } {
@@ -74,6 +75,9 @@ function parseAtomFeed(xml: string): { papers: ArxivPaper[]; total: number } {
       htmlUrl: `https://arxiv.org/html/${id}`,
       pdfUrl: `https://arxiv.org/pdf/${id}`,
       absUrl: `https://arxiv.org/abs/${id}`,
+      hasHtml: categories.some((c) =>
+        c.startsWith("cs.") || c.startsWith("math.") || c.startsWith("physics.")
+      ),
     });
   }
 
@@ -83,7 +87,8 @@ function parseAtomFeed(xml: string): { papers: ArxivPaper[]; total: number } {
 export async function searchArxiv(
   query: string,
   start = 0,
-  maxResults = 10
+  maxResults = 10,
+  userAgent = "Anaxi/1.0 (open science platform)"
 ): Promise<{ papers: ArxivPaper[]; total: number }> {
   const params = new URLSearchParams({
     search_query: `all:${query}`,
@@ -93,33 +98,37 @@ export async function searchArxiv(
   });
 
   const res = await fetch(`${ARXIV_API}?${params}`, {
-    headers: { "User-Agent": "Anaxi-MCP/1.0 (open science platform)" },
+    headers: { "User-Agent": userAgent },
   });
   if (!res.ok) throw new Error(`arXiv API error: ${res.status}`);
   return parseAtomFeed(await res.text());
 }
 
-export async function getArxivPaper(id: string): Promise<ArxivPaper | null> {
+export async function getPaper(
+  id: string,
+  userAgent = "Anaxi/1.0 (open science platform)"
+): Promise<ArxivPaper | null> {
   const params = new URLSearchParams({ id_list: id });
   const res = await fetch(`${ARXIV_API}?${params}`, {
-    headers: { "User-Agent": "Anaxi-MCP/1.0 (open science platform)" },
+    headers: { "User-Agent": userAgent },
   });
   if (!res.ok) return null;
   const { papers } = parseAtomFeed(await res.text());
   return papers[0] ?? null;
 }
 
-export async function getArxivPaperHtml(id: string): Promise<string | null> {
+export async function getPaperHtml(
+  id: string,
+  userAgent = "Anaxi/1.0 (open science platform)"
+): Promise<string | null> {
   const url = `https://arxiv.org/html/${id}`;
   const res = await fetch(url, {
-    headers: { "User-Agent": "Anaxi-MCP/1.0 (open science platform)" },
+    headers: { "User-Agent": userAgent },
   });
   if (!res.ok) return null;
   const contentType = res.headers.get("content-type") ?? "";
-  // If arxiv redirects to abs page or returns non-HTML, it has no HTML version
   if (!contentType.includes("text/html")) return null;
   const html = await res.text();
-  // Strip script/style tags for a cleaner text representation
   return html
     .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, "")
     .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "")

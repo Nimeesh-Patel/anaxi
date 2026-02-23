@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
-import type { ArxivPaper } from "@/lib/arxiv/api";
+import type { ArxivPaper } from "@/lib/mcp";
 
 export function PaperCard({ paper }: { paper: ArxivPaper }) {
   const date = new Date(paper.published);

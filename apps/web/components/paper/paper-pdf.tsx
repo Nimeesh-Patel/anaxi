@@ -1,6 +1,6 @@
 "use client";
 
-import type { ArxivPaper } from "@/lib/arxiv/api";
+import type { ArxivPaper } from "@/lib/mcp";
 
 type Props = { paper: ArxivPaper };
 

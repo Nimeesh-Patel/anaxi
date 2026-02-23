@@ -1,6 +1,6 @@
-// Semantic Scholar API tools for MCP
+// Semantic Scholar API client — shared by web app and MCP
 // API docs: https://api.semanticscholar.org/api-docs/
-// No API key needed for basic usage (rate limited to ~100 req/5min)
+// No API key needed for basic usage (rate limited ~100 req/5min)
 
 const SS_API = "https://api.semanticscholar.org/graph/v1";
 
@@ -42,21 +42,21 @@ function mapPaper(raw: Record<string, unknown>): SemanticScholarPaper {
   };
 }
 
-export async function getSemanticScholarPaper(
-  arxivId: string
+export async function getPaper(
+  arxivId: string,
+  userAgent = "Anaxi/1.0"
 ): Promise<SemanticScholarPaper | null> {
   const url = `${SS_API}/paper/arXiv:${arxivId}?fields=${PAPER_FIELDS}`;
-  const res = await fetch(url, {
-    headers: { "User-Agent": "Anaxi-MCP/1.0" },
-  });
+  const res = await fetch(url, { headers: { "User-Agent": userAgent } });
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`Semantic Scholar API error: ${res.status}`);
   return mapPaper(await res.json());
 }
 
-export async function searchSemanticScholar(
+export async function search(
   query: string,
-  limit = 10
+  limit = 10,
+  userAgent = "Anaxi/1.0"
 ): Promise<{ papers: SemanticScholarPaper[]; total: number }> {
   const params = new URLSearchParams({
     query,
@@ -64,7 +64,7 @@ export async function searchSemanticScholar(
     fields: SEARCH_FIELDS,
   });
   const res = await fetch(`${SS_API}/paper/search?${params}`, {
-    headers: { "User-Agent": "Anaxi-MCP/1.0" },
+    headers: { "User-Agent": userAgent },
   });
   if (!res.ok) throw new Error(`Semantic Scholar API error: ${res.status}`);
   const data = await res.json();
@@ -74,18 +74,17 @@ export async function searchSemanticScholar(
   };
 }
 
-export async function getSemanticScholarReferences(
+export async function getReferences(
   arxivId: string,
-  limit = 20
+  limit = 20,
+  userAgent = "Anaxi/1.0"
 ): Promise<SemanticScholarPaper[]> {
   const params = new URLSearchParams({
     fields: SEARCH_FIELDS,
     limit: String(Math.min(limit, 100)),
   });
   const url = `${SS_API}/paper/arXiv:${arxivId}/references?${params}`;
-  const res = await fetch(url, {
-    headers: { "User-Agent": "Anaxi-MCP/1.0" },
-  });
+  const res = await fetch(url, { headers: { "User-Agent": userAgent } });
   if (res.status === 404) return [];
   if (!res.ok) throw new Error(`Semantic Scholar API error: ${res.status}`);
   const data = await res.json();
@@ -94,18 +93,17 @@ export async function getSemanticScholarReferences(
   );
 }
 
-export async function getSemanticScholarCitations(
+export async function getCitations(
   arxivId: string,
-  limit = 20
+  limit = 20,
+  userAgent = "Anaxi/1.0"
 ): Promise<SemanticScholarPaper[]> {
   const params = new URLSearchParams({
     fields: SEARCH_FIELDS,
     limit: String(Math.min(limit, 100)),
   });
   const url = `${SS_API}/paper/arXiv:${arxivId}/citations?${params}`;
-  const res = await fetch(url, {
-    headers: { "User-Agent": "Anaxi-MCP/1.0" },
-  });
+  const res = await fetch(url, { headers: { "User-Agent": userAgent } });
   if (res.status === 404) return [];
   if (!res.ok) throw new Error(`Semantic Scholar API error: ${res.status}`);
   const data = await res.json();
