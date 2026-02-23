@@ -88,7 +88,7 @@ export async function searchArxiv(
   query: string,
   start = 0,
   maxResults = 10,
-  userAgent = "Anaxi/1.0 (open science platform)"
+  userAgent = "Anaxi-MCP/1.0 (nimeeshpatel04@gmail.com)"
 ): Promise<{ papers: ArxivPaper[]; total: number }> {
   const params = new URLSearchParams({
     search_query: `all:${query}`,
@@ -97,8 +97,9 @@ export async function searchArxiv(
     sortBy: "relevance",
   });
 
+  await new Promise(resolve => setTimeout(resolve, 1000));
   const res = await fetch(`${ARXIV_API}?${params}`, {
-    headers: { "User-Agent": "Anaxi-MCP/1.0 (nimeeshpatel04@gmail.com)" },
+    headers: { "User-Agent": userAgent },
   });
   if (!res.ok) throw new Error(`arXiv API error: ${res.status}`);
   return parseAtomFeed(await res.text());
@@ -106,9 +107,10 @@ export async function searchArxiv(
 
 export async function getPaper(
   id: string,
-  userAgent = "Anaxi/1.0 (open science platform)"
+  userAgent = "Anaxi-MCP/1.0 (nimeeshpatel04@gmail.com)"
 ): Promise<ArxivPaper | null> {
   const params = new URLSearchParams({ id_list: id });
+  await new Promise(resolve => setTimeout(resolve, 1000));
   const res = await fetch(`${ARXIV_API}?${params}`, {
     headers: { "User-Agent": userAgent },
   });
@@ -119,9 +121,10 @@ export async function getPaper(
 
 export async function getPaperHtml(
   id: string,
-  userAgent = "Anaxi/1.0 (open science platform)"
+  userAgent = "Anaxi-MCP/1.0 (nimeeshpatel04@gmail.com)"
 ): Promise<string | null> {
   const url = `https://arxiv.org/html/${id}`;
+  await new Promise(resolve => setTimeout(resolve, 1000));
   const res = await fetch(url, {
     headers: { "User-Agent": userAgent },
   });

@@ -9,7 +9,7 @@ export async function GET(
   const { id } = await params;
 
   const res = await fetch(`https://arxiv.org/html/${id}`, {
-    headers: { "User-Agent": "Anaxi/1.0 (open science platform)" },
+    headers: { "User-Agent": "Anaxi-MCP/1.0 (nimeeshpatel04@gmail.com)" },
     next: { revalidate: 3600 },
   });
 
