@@ -8,9 +8,11 @@ anaxi/
 ├── apps/
 │   ├── web/                      # Next.js (Vercel)
 │   │   ├── app/
+│   │   │   ├── api/chat/route.ts # Sarvam orchestration loop (tool calling)
 │   │   ├── components/
 │   │   ├── lib/
 │   │   │   ├── mcp.ts            # MCP REST client (web → MCP server)
+│   │   │   ├── sarvam.ts         # Sarvam API wrapper
 │   │   │   ├── orcid/
 │   │   │   ├── supabase/
 │   │   │   ├── session.ts
@@ -27,10 +29,7 @@ anaxi/
 │       │   │   ├── search-arxiv.ts
 │       │   │   ├── get-paper.ts
 │       │   │   ├── semantic-scholar.ts
-│       │   │   ├── summarize.ts   # Sarvam AI
-│       │   │   └── rank.ts       # Sarvam AI
 │       │   ├── services/
-│       │   │   ├── sarvam.ts     # Sarvam AI wrapper
 │       │   │   └── cache.ts
 │       │   └── types.ts
 │       ├── package.json
@@ -74,6 +73,8 @@ ORCID_CLIENT_SECRET=...
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 MCP_URL=http://localhost:3001      # Railway URL in prod
 MCP_SERVER_TOKEN=...               # optional shared secret for MCP REST endpoint
+SARVAM_API_KEY=...                 # for /api/chat tool orchestration
+SARVAM_MODEL=...                   # optional, defaults to sarvam-m
 ```
 
 **MCP** (`apps/mcp/.env`):
@@ -81,15 +82,15 @@ MCP_SERVER_TOKEN=...               # optional shared secret for MCP REST endpoin
 PORT=3001
 SUPABASE_URL=...
 SUPABASE_SERVICE_ROLE_KEY=...
-SARVAM_API_KEY=...               # for summarize/rank tools (dashboard.sarvam.ai)
 MCP_SERVER_TOKEN=...              # optional; if set, /tools/:name requires x-mcp-token
 ```
 
 ## MCP Server (Research Orchestration Layer)
 - **MCP endpoint**: `POST /mcp` (Streamable HTTP — for Claude/AI clients)
-- **REST endpoint**: `POST /tools/:name` (JSON — for web app)
+- **REST endpoint**: `POST /tools/:name` (JSON)
+- **Tool-call endpoint**: `POST /tool` with `{ name, arguments }` (OpenAI-style)
 - **Health**: `GET /health`
-- Centralizes rate limiting, caching, Sarvam AI calls
+- Centralizes deterministic tool execution and caching
 - Deployable on Railway (set PORT, bind 0.0.0.0)
 
 ## MCP Tools
@@ -101,8 +102,6 @@ MCP_SERVER_TOKEN=...              # optional; if set, /tools/:name requires x-mc
 | `search_semantic_scholar` | Search with citations, TL;DR |
 | `get_semantic_scholar_paper` | Detailed metadata |
 | `get_paper_references` / `get_paper_citations` | Citation graph |
-| `summarize` | AI summary (Sarvam) |
-| `rank` | AI ranking of papers (Sarvam) |
 | `get_comments` / `post_comment` | Discussion |
 | `save_paper` / `unsave_paper` / `list_saved_papers` | Reading list |
 
@@ -111,7 +110,7 @@ MCP_SERVER_TOKEN=...              # optional; if set, /tools/:name requires x-mc
 - **MCP**: Railway/Render/Fly — deploy from repo root so workspace packages are available.
   - Build command: `npm run build:mcp`
   - Start command: `npm run start --workspace=apps/mcp`
-  - Required env: `SARVAM_API_KEY`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`
+  - Required env: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`
   - Optional env: `MCP_SERVER_TOKEN` to require `x-mcp-token` on `/tools/:name`
 
 ## DB Schema
