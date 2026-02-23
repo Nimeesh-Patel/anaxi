@@ -57,7 +57,7 @@ Next.js 16 · TypeScript · PostgreSQL (Supabase) · Tailwind · shadcn/ui · MC
 ## Setup
 ```bash
 npm install
-npm run build:packages           # build shared packages first
+npm run build:libs               # build shared packages first
 npm run dev                      # web app on localhost:3000
 npm run dev:mcp                  # MCP server on port 3001
 ```
@@ -73,6 +73,7 @@ ORCID_CLIENT_ID=...
 ORCID_CLIENT_SECRET=...
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 MCP_URL=http://localhost:3001      # Railway URL in prod
+MCP_SERVER_TOKEN=...               # optional shared secret for MCP REST endpoint
 ```
 
 **MCP** (`apps/mcp/.env`):
@@ -81,6 +82,7 @@ PORT=3001
 SUPABASE_URL=...
 SUPABASE_SERVICE_ROLE_KEY=...
 SARVAM_API_KEY=...               # for summarize/rank tools (dashboard.sarvam.ai)
+MCP_SERVER_TOKEN=...              # optional; if set, /tools/:name requires x-mcp-token
 ```
 
 ## MCP Server (Research Orchestration Layer)
@@ -106,7 +108,11 @@ SARVAM_API_KEY=...               # for summarize/rank tools (dashboard.sarvam.ai
 
 ## Deployment
 - **Web**: Vercel — Root Directory = `apps/web`
-- **MCP**: Railway — Root Directory = `apps/mcp`, build = `npm run build`, start = `npm run start`
+- **MCP**: Railway/Render/Fly — deploy from repo root so workspace packages are available.
+  - Build command: `npm run build:mcp`
+  - Start command: `npm run start --workspace=apps/mcp`
+  - Required env: `SARVAM_API_KEY`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`
+  - Optional env: `MCP_SERVER_TOKEN` to require `x-mcp-token` on `/tools/:name`
 
 ## DB Schema
 Run `apps/web/supabase/schema.sql` against your Supabase project.

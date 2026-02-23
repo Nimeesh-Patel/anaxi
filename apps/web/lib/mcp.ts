@@ -2,6 +2,7 @@
 // Set MCP_URL in .env.local (Railway URL in prod, http://localhost:3001 in dev)
 
 const MCP_URL = process.env.MCP_URL ?? "http://localhost:3001";
+const MCP_SERVER_TOKEN = process.env.MCP_SERVER_TOKEN;
 
 async function callTool<T>(
   name: string,
@@ -10,7 +11,10 @@ async function callTool<T>(
 ): Promise<T> {
   const res = await fetch(`${MCP_URL}/tools/${name}`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      ...(MCP_SERVER_TOKEN ? { "x-mcp-token": MCP_SERVER_TOKEN } : {}),
+    },
     body: JSON.stringify(args),
     next: { revalidate },
   });
