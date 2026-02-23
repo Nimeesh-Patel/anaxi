@@ -4,8 +4,6 @@ import { z } from "zod";
 import * as searchArxiv from "./tools/search-arxiv.js";
 import * as getPaper from "./tools/get-paper.js";
 import * as ss from "./tools/semantic-scholar.js";
-import * as summarize from "./tools/summarize.js";
-import * as rank from "./tools/rank.js";
 import {
   createSupabaseClient,
   getComments,
@@ -118,29 +116,6 @@ export function registerTools(server: McpServer): void {
       },
     },
     async ({ arxiv_id, limit }) => ss.getCites(arxiv_id, limit ?? 20)
-  );
-
-  // ── AI tools (Sarvam) ────────────────────────────────────────────────────
-  registerTool<{ arxiv_id: string }>(
-    server,
-    "summarize",
-    {
-      description: "Summarize a paper using AI (main contribution, method, results).",
-      inputSchema: { arxiv_id: z.string().describe("arXiv ID") },
-    },
-    async ({ arxiv_id }) => summarize.run(arxiv_id)
-  );
-
-  registerTool<{ arxiv_ids: string[] }>(
-    server,
-    "rank",
-    {
-      description: "Rank papers by impact/relevance using AI.",
-      inputSchema: {
-        arxiv_ids: z.array(z.string()).describe("List of arXiv IDs to rank"),
-      },
-    },
-    async ({ arxiv_ids }) => rank.run(arxiv_ids)
   );
 
   // ── Database (Supabase) ───────────────────────────────────────────────────

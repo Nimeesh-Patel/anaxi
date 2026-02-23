@@ -9,13 +9,12 @@ import { registerTools } from "./router.js";
 import * as searchArxivTool from "./tools/search-arxiv.js";
 import * as getPaperTool from "./tools/get-paper.js";
 import * as ssTool from "./tools/semantic-scholar.js";
-import * as summarizeTool from "./tools/summarize.js";
-import * as rankTool from "./tools/rank.js";
 
 type Args = Record<string, unknown>;
 type ToolResult = { content: { type: "text"; text: string }[]; isError?: boolean };
 
 const toolHandlers: Record<string, (args: Args) => Promise<ToolResult>> = {
+  search_arxiv: (a) => searchArxivTool.run(String(a.query ?? ""), Number(a.start ?? 0), Number(a.max_results ?? 10)),
   search_papers: (a) => searchArxivTool.run(String(a.query ?? ""), Number(a.start ?? 0), Number(a.max_results ?? 10)),
   get_paper: (a) => getPaperTool.run(String(a.arxiv_id ?? ""), Boolean(a.include_text ?? false)),
   get_paper_text: (a) => getPaperTool.run(String(a.arxiv_id ?? ""), true),
@@ -23,8 +22,6 @@ const toolHandlers: Record<string, (args: Args) => Promise<ToolResult>> = {
   get_semantic_scholar_paper: (a) => ssTool.getPaperByArxivId(String(a.arxiv_id ?? "")),
   get_paper_references: (a) => ssTool.getRefs(String(a.arxiv_id ?? ""), Number(a.limit ?? 20)),
   get_paper_citations: (a) => ssTool.getCites(String(a.arxiv_id ?? ""), Number(a.limit ?? 20)),
-  summarize: (a) => summarizeTool.run(String(a.arxiv_id ?? "")),
-  rank: (a) => rankTool.run(a.arxiv_ids as string[]),
 };
 
 const PORT = parseInt(process.env.PORT ?? "3001", 10);
@@ -87,6 +84,44 @@ app.get("/mcp", (_req, res) => {
 
 app.get("/health", (_req, res) => {
   res.json({ status: "ok", service: "anaxi-mcp" });
+});
+
+// OpenAI-style tool endpoint for backend orchestrators.
+// Body shape: { name: string, arguments: object }
+app.post("/tool", express.json(), async (req, res) => {
+  if (!isAuthorized(req)) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+
+  const payload = (req.body as { name?: string; arguments?: Args }) ?? {};
+  if (!payload.name) {
+    res.status(400).json({ error: "Missing tool name" });
+    return;
+  }
+
+  const handler = toolHandlers[payload.name];
+  if (!handler) {
+    res.status(404).json({ error: `Unknown tool: ${payload.name}` });
+    return;
+  }
+
+  try {
+    const result = await handler(payload.arguments ?? {});
+    if (result.isError) {
+      res.status(500).json({ error: result.content[0]?.text ?? "Tool error" });
+      return;
+    }
+    const text = result.content[0]?.text ?? "";
+    try {
+      res.json(JSON.parse(text));
+    } catch {
+      res.json({ text });
+    }
+  } catch (err) {
+    console.error(`Tool ${payload.name} error:`, err);
+    res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
+  }
 });
 
 // REST endpoint for the web app: POST /tools/:name with JSON body args
