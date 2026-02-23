@@ -15,7 +15,8 @@
     "@anaxi/semantic-scholar": "*",
     "@modelcontextprotocol/sdk": "^1.12.1",
     "express": "^4.21.0",
-    "zod": "^3.22.0"
+    "zod": "^3.22.0",
+    "@supabase/supabase-js": "^2.96.0"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",
