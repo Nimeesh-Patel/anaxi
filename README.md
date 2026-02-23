@@ -29,6 +29,7 @@ anaxi/
 │       │   │   ├── search-arxiv.ts
 │       │   │   ├── get-paper.ts
 │       │   │   ├── semantic-scholar.ts
+│       │   │   ├── semantic-scholar-api.ts
 │       │   ├── services/
 │       │   │   └── cache.ts
 │       │   └── types.ts
@@ -102,6 +103,9 @@ MCP_SERVER_TOKEN=...              # optional; if set, /tools/:name requires x-mc
 | `search_semantic_scholar` | Search with citations, TL;DR |
 | `get_semantic_scholar_paper` | Detailed metadata |
 | `get_paper_references` / `get_paper_citations` | Citation graph |
+| `searchPapers` / `getPaper` / `getAuthor` | Semantic Scholar Graph API tools |
+| `getRecommendations` | Related paper recommendations |
+| `listDatasets` / `getDatasetDetails` | Semantic Scholar Datasets API tools |
 | `get_comments` / `post_comment` | Discussion |
 | `save_paper` / `unsave_paper` / `list_saved_papers` | Reading list |
 

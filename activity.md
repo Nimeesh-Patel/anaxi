@@ -20,3 +20,5 @@ Architecture wired: web → MCP REST → external APIs (2026-02-23).
 - Wire annotation highlights in iframe
 - Kindle-style highlight count
 - Annotation sidebar with upvoting
+
+- Added Semantic Scholar MCP tools: `searchPapers`, `getPaper`, `getAuthor`, `getRecommendations`, `listDatasets`, `getDatasetDetails` with retry-on-429 handling.
