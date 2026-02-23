@@ -4,6 +4,7 @@ import { z } from "zod";
 import * as searchArxiv from "./tools/search-arxiv.js";
 import * as getPaper from "./tools/get-paper.js";
 import * as ss from "./tools/semantic-scholar.js";
+import * as semanticScholarApi from "./tools/semantic-scholar-api.js";
 import {
   createSupabaseClient,
   getComments,
@@ -143,6 +144,87 @@ export function registerTools(server: McpServer): void {
       },
     },
     async ({ author_id }) => ss.getSsAuthor(author_id)
+  );
+
+  registerTool<{ query: string; limit?: number; offset?: number; fields?: string[] }>(
+    server,
+    "searchPapers",
+    {
+      description: "Search Semantic Scholar papers by query.",
+      inputSchema: {
+        query: z.string().min(1).describe("Paper search query"),
+        limit: z.number().int().min(1).max(100).optional().describe("Results per page"),
+        offset: z.number().int().min(0).optional().describe("Pagination offset"),
+        fields: z.array(z.string()).optional().describe("Optional Semantic Scholar fields"),
+      },
+    },
+    async ({ query, limit, offset, fields }) =>
+      semanticScholarApi.searchPapers(query, limit ?? 10, offset ?? 0, fields)
+  );
+
+  registerTool<{ paperId: string; fields?: string[] }>(
+    server,
+    "getPaper",
+    {
+      description: "Get a Semantic Scholar paper by paperId/CorpusId/DOI/arXiv ID.",
+      inputSchema: {
+        paperId: z.string().min(1).describe("Paper identifier, e.g. ARXIV:2106.15928"),
+        fields: z.array(z.string()).optional().describe("Optional Semantic Scholar fields"),
+      },
+    },
+    async ({ paperId, fields }) => semanticScholarApi.getPaperById(paperId, fields)
+  );
+
+  registerTool<{ authorId: string; fields?: string[] }>(
+    server,
+    "getAuthor",
+    {
+      description: "Get a Semantic Scholar author profile by authorId.",
+      inputSchema: {
+        authorId: z.string().min(1),
+        fields: z.array(z.string()).optional().describe("Optional Semantic Scholar author fields"),
+      },
+    },
+    async ({ authorId, fields }) => semanticScholarApi.getAuthorById(authorId, fields)
+  );
+
+  registerTool<{ positiveIds: string[]; negativeIds?: string[]; limit?: number; fields?: string[] }>(
+    server,
+    "getRecommendations",
+    {
+      description: "Get Semantic Scholar recommendations from positive/negative paper IDs.",
+      inputSchema: {
+        positiveIds: z.array(z.string()).min(1),
+        negativeIds: z.array(z.string()).optional(),
+        limit: z.number().int().min(1).max(100).optional(),
+        fields: z.array(z.string()).optional().describe("Optional Semantic Scholar paper fields"),
+      },
+    },
+    async ({ positiveIds, negativeIds, limit, fields }) =>
+      semanticScholarApi.getRecommendationsByPaperIds(positiveIds, negativeIds ?? [], limit ?? 20, fields)
+  );
+
+  registerTool<Record<string, never>>(
+    server,
+    "listDatasets",
+    {
+      description: "List Semantic Scholar dataset releases.",
+      inputSchema: {},
+    },
+    async () => semanticScholarApi.listDatasets()
+  );
+
+  registerTool<{ releaseId: string; datasetName: string }>(
+    server,
+    "getDatasetDetails",
+    {
+      description: "Get details and download info for a Semantic Scholar dataset release.",
+      inputSchema: {
+        releaseId: z.string().min(1),
+        datasetName: z.string().min(1),
+      },
+    },
+    async ({ releaseId, datasetName }) => semanticScholarApi.getDatasetDetails(releaseId, datasetName)
   );
 
   // ── Database (Supabase) ───────────────────────────────────────────────────
