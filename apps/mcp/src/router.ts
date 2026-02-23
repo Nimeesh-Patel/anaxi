@@ -118,6 +118,33 @@ export function registerTools(server: McpServer): void {
     async ({ arxiv_id, limit }) => ss.getCites(arxiv_id, limit ?? 20)
   );
 
+  registerTool<{ positive_paper_ids: string[]; negative_paper_ids?: string[]; limit?: number }>(
+    server,
+    "recommend_papers",
+    {
+      description: "Recommend papers similar to given Semantic Scholar paper IDs.",
+      inputSchema: {
+        positive_paper_ids: z.array(z.string()).min(1).describe("Seed paper IDs (Semantic Scholar IDs)"),
+        negative_paper_ids: z.array(z.string()).optional().describe("Papers to steer away from"),
+        limit: z.number().int().min(1).max(100).optional().describe("Results (1-100, default 20)"),
+      },
+    },
+    async ({ positive_paper_ids, negative_paper_ids, limit }) =>
+      ss.recommendPapers(positive_paper_ids, negative_paper_ids ?? [], limit ?? 20)
+  );
+
+  registerTool<{ author_id: string }>(
+    server,
+    "get_author",
+    {
+      description: "Get Semantic Scholar author profile: hIndex, paper count, paper list.",
+      inputSchema: {
+        author_id: z.string().describe("Semantic Scholar author ID"),
+      },
+    },
+    async ({ author_id }) => ss.getSsAuthor(author_id)
+  );
+
   // ── Database (Supabase) ───────────────────────────────────────────────────
   const getDb = () => {
     const url = process.env.SUPABASE_URL;

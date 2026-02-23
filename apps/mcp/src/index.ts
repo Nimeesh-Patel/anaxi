@@ -23,6 +23,13 @@ const toolHandlers: Record<string, (args: Args) => Promise<ToolResult>> = {
   get_semantic_scholar_paper: (a) => ssTool.getPaperByArxivId(String(a.arxiv_id ?? "")),
   get_paper_references: (a) => ssTool.getRefs(String(a.arxiv_id ?? ""), Number(a.limit ?? 20)),
   get_paper_citations: (a) => ssTool.getCites(String(a.arxiv_id ?? ""), Number(a.limit ?? 20)),
+  recommend_papers: (a) =>
+    ssTool.recommendPapers(
+      (a.positive_paper_ids as string[]) ?? [],
+      (a.negative_paper_ids as string[]) ?? [],
+      Number(a.limit ?? 20)
+    ),
+  get_author: (a) => ssTool.getSsAuthor(String(a.author_id ?? "")),
 };
 
 const PORT = parseInt(process.env.PORT ?? "3001", 10);
