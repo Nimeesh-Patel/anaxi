@@ -1,6 +1,6 @@
 # Anaxi
 
-Open science criticism platform. Discover arXiv papers, read them cleanly, annotate inline, and engage in serious rational debate — grounded in Popperian open society values.
+Discover arXiv papers, read them cleanly, annotate inline, discuss, criticise, and engage in serious rational conversation.
 
 ## Project Structure
 ```
